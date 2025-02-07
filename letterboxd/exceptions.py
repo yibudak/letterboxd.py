@@ -12,3 +12,43 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+import json
+
+
+class LetterboxdError(Exception):
+    """Base class for other exceptions"""
+
+    def __init__(self, response: dict):
+        self.message = json.dumps(response, indent=4)
+        super().__init__(self.message)
+
+    def __str__(self) -> str:
+        return f"Letterboxd Error: {self.message}"
+
+
+class AuthenticationError(LetterboxdError):
+    """Raised when authentication failed"""
+
+    def __str__(self) -> str:
+        return f"Authentication Error: {self.message}"
+
+
+class MemberNotFoundError(LetterboxdError):
+    """Raised when member not found"""
+
+    def __str__(self) -> str:
+        return f"Member Not Found Error: {self.message}"
+
+
+class TooManyFollow(LetterboxdError):
+    """Raised when trying to follow too many members in a day, 500 is the limit."""
+
+    def __str__(self) -> str:
+        return f"Too Many Follow Error: {self.message}"
+
+
+class UnknownError(Exception):
+    """Raised when an unknown error occurred"""
+
+    def __str__(self) -> str:
+        return f"Unknown Error: {self.message}"
