@@ -353,11 +353,11 @@ class Letterboxd:
 
     def like_review(self, review_id: str) -> bool:
         response = self._set_review_like(review_id, liked=True)
-        return response["data"]["liked"]
+        return response
 
     def unlike_review(self, review_id: str) -> bool:
         response = self._set_review_like(review_id, liked=False)
-        return not response["data"]["liked"]
+        return not response
 
     def send_review(
         self,
