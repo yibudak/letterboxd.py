@@ -14,7 +14,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 from datetime import datetime, timedelta
 
-from letterboxd.requests_handler import LetterboxdSession
+from .requests_handler import LetterboxdSession
 
 from . import exceptions
 from .constants import CLIENT_ID, CLIENT_SECRET
