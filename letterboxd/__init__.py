@@ -199,7 +199,7 @@ class Letterboxd:
         user_id: str,
         per_page: int = 40,
         start: int = 1,
-        sort="Date",
+        sort: str = "Date",
     ) -> dict:
         return self._get_following_status(
             user_id=user_id,
@@ -208,3 +208,100 @@ class Letterboxd:
             sort=sort,
             action="following",
         )
+
+    def get_film(self, film_id: str) -> dict:
+        response = self.__session.http(
+            method="GET",
+            path=f"/api/v0/film/{film_id}",
+        )
+        self._handle_error(response)
+        return response
+
+    def get_film_members(
+        self,
+        film_id: str,
+        sort: str = "Date",
+        film_relationship: str = "Watched",
+        start: int = 1,
+    ) -> dict:
+        """
+        Available sort options:
+            - All sorts from get_followers
+
+        Available film_relationship options:
+            - Watched (who watched the film)
+            - Liked (who liked the film)
+            - Favorited (who added the film to their favorites)
+
+
+        """
+        params = {
+            "sort": sort,
+            "filmRelationship": film_relationship,
+        }
+        if start > 1:
+            params["cursor"] = f"start={start}"
+        response = self.__session.http(
+            method="GET",
+            path=f"/api/v0/film/{film_id}/members",
+            params=params,
+        )
+        self._handle_error(response)
+        return response
+
+    def get_film_statistics(self, film_id: str) -> dict:
+        response = self.__session.http(
+            method="GET",
+            path=f"/api/v0/film/{film_id}/statistics",
+        )
+        self._handle_error(response)
+        return response
+
+    def get_film_me(self, film_id: str) -> dict:
+        response = self.__session.http(
+            method="GET",
+            path=f"/api/v0/film/{film_id}/me",
+        )
+        self._handle_error(response)
+        return response
+
+    def get_film_availability(self, film_id: str) -> dict:
+        response = self.__session.http(
+            method="GET",
+            path=f"/api/v0/film/{film_id}/availability",
+        )
+        self._handle_error(response)
+        return response
+
+    def get_log_entries(
+        self,
+        film_id: str,
+        sort: str = "ReviewPopularity",
+        where: str = "HasReview",
+        start: int = 1,
+    ) -> dict:
+        """
+        WTF YOU CAN GET ALL RECENT REVIEWS???
+        Available sort options:
+            - WhenAdded
+            - ReviewPopularity
+
+        Available where options:
+            - HasReview
+            - ???
+
+        """
+        params = {
+            "film": film_id,
+            "sort": sort,
+            "where": where,
+        }
+        if start > 1:
+            params["cursor"] = f"start={start}"
+        response = self.__session.http(
+            method="GET",
+            path="/api/v0/log-entries",
+            params=params,
+        )
+        self._handle_error(response)
+        return response
