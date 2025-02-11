@@ -306,6 +306,14 @@ class Letterboxd:
         self._handle_error(response)
         return response
 
+    def get_log_entry_me(self, log_entry_id: str) -> dict:
+        response = self.__session.http(
+            method="GET",
+            path=f"/api/v0/log-entry/{log_entry_id}/me",
+        )
+        self._handle_error(response)
+        return response
+
     def get_films(self, sort: str= "FilmPopularity", start: int = 1) -> dict:
         """
         Available sort options:
