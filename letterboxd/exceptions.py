@@ -37,17 +37,24 @@ class MemberNotFoundError(LetterboxdError):
     """Raised when member not found"""
 
     def __str__(self) -> str:
-        return f"Member Not Found Error: {self.message}"
+        return f"Member Not Found: {self.message}"
 
 
 class TooManyFollow(LetterboxdError):
     """Raised when trying to follow too many members in a day, 500 is the limit."""
 
     def __str__(self) -> str:
-        return f"Too Many Follow Error: {self.message}"
+        return f"Too Many Follow: {self.message}"
 
 
-class UnknownError(Exception):
+class InvalidRatingError(LetterboxdError):
+    """Raised when an invalid rating is given"""
+
+    def __str__(self) -> str:
+        return f"Invalid Rating: {self.message}"
+
+
+class UnknownError(LetterboxdError):
     """Raised when an unknown error occurred"""
 
     def __str__(self) -> str:

@@ -63,15 +63,6 @@ class Letterboxd:
     def _set_session_expire_date(self, expires_in: int):
         self.session_expire_date = datetime.now() + timedelta(seconds=expires_in)
 
-    def _set_user_follow(self, user_id: str, action: str) -> bool:
-        return self.__session.http(
-            method="PATCH",
-            path=f"/api/v0/member/{user_id}/me",
-            json={
-                "following": True if action == "follow" else False,
-            },
-        )
-
     def _handle_error(self, response: dict) -> None:
         response_str = str(response)
         if not response.get("error") and "Error" not in response_str:
@@ -86,6 +77,15 @@ class Letterboxd:
         raise exceptions.UnknownError(response)
 
     ### Follow/Unfollow ###
+
+    def _set_user_follow(self, user_id: str, action: str) -> bool:
+        return self.__session.http(
+            method="PATCH",
+            path=f"/api/v0/member/{user_id}/me",
+            json={
+                "following": True if action == "follow" else False,
+            },
+        )
 
     def follow_user(self, user_id: str):
         response = self._set_user_follow(user_id, "follow")
@@ -305,3 +305,120 @@ class Letterboxd:
         )
         self._handle_error(response)
         return response
+
+    def get_films(self, sort: str= "FilmPopularity", start: int = 1) -> dict:
+        """
+        Available sort options:
+            - FilmPopularity
+            - FilmPopularityThisWeek
+            - FilmPopularityThisMonth
+            - FilmPopularityThisYear
+            - FilmPopularityWithFriends
+            - FilmPopularityWithFriendsThisWeek
+            - FilmPopularityWithFriendsThisMonth
+            - FilmPopularityWithFriendsThisYear
+
+        TODO: Add other filter options?
+        """
+        params = {
+            "sort": sort,
+        }
+        if start > 1:
+            params["cursor"] = f"start={start}"
+        response = self.__session.http(
+            method="GET",
+            path="/api/v0/films",
+            params=params,
+        )
+        self._handle_error(response)
+        return response
+
+    ### Review Actions ###
+    def _set_review_like(self, review_id: str, liked: bool) -> bool:
+        response = self.__session.http(
+            method="PATCH",
+            path=f"/api/v0/log-entry/{review_id}/me",
+            json={"liked": liked},
+        )
+        self._handle_error(response)
+        return True
+
+    def like_review(self, review_id: str) -> bool:
+        response = self._set_review_like(review_id, liked=True)
+        return response["data"]["liked"]
+
+    def unlike_review(self, review_id: str) -> bool:
+        response = self._set_review_like(review_id, liked=False)
+        return not response["data"]["liked"]
+
+    def send_review(
+        self,
+        film_id: str,
+        review: str,
+        rating: int,
+        liked: bool,
+        diary_date: str = datetime.now().strftime("%Y-%m-%d"),
+        rewatch: bool = False,
+        contains_spoilers: bool = False,
+        tags: list[str] = [],
+    ) -> dict:
+        data = {
+            "filmId": film_id,
+            "diaryDetails": {
+                "diaryDate": diary_date,
+                "rewatch": rewatch,
+            },
+            "review": {
+                "text": review,
+                "containsSpoilers": contains_spoilers,
+            },
+            "tags": tags,
+            "rating": rating,
+            "liked": liked,
+        }
+        response = self.__session.http(
+            method="POST",
+            path="/api/v0/log-entries",
+            json=data,
+        )
+        self._handle_error(response)
+        return response
+
+    def delete_review(self, review_id: str) -> bool:
+        response = self.__session.http(
+            method="DELETE",
+            path=f"/api/v0/log-entry/{review_id}",
+        )
+        self._handle_error(response)
+        return True
+
+    def watch_film(self, film_id: str) -> bool:
+        response = self.__session.http(
+            method="PATCH",
+            path=f"/api/v0/film/{film_id}/me",
+            json={"watched": True},
+        )
+        self._handle_error(response)
+        return True
+
+    def unwatch_film(self, film_id: str) -> bool:
+        response = self.__session.http(
+            method="PATCH",
+            path=f"/api/v0/film/{film_id}/me",
+            json={"watched": False},
+        )
+        self._handle_error(response)
+        return True
+
+    def rate_film(self, film_id: str, rating: int) -> bool:
+        if rating > 5:
+            raise exceptions.InvalidRatingError(rating)
+        elif rating <= 0:
+            rating = None
+        response = self.__session.http(
+            method="PATCH",
+            path=f"/api/v0/film/{film_id}/me",
+            json={"rating": rating},
+        )
+        self._handle_error(response)
+        return True
