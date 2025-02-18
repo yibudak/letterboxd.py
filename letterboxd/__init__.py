@@ -364,7 +364,7 @@ class Letterboxd:
         film_id: str,
         review: str,
         rating: int,
-        liked: bool,
+        like: bool,
         diary_date: str = datetime.now().strftime("%Y-%m-%d"),
         rewatch: bool = False,
         contains_spoilers: bool = False,
@@ -382,7 +382,7 @@ class Letterboxd:
             },
             "tags": tags,
             "rating": rating,
-            "liked": liked,
+            "like": like,
         }
         response = self.__session.http(
             method="POST",
