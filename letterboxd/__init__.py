@@ -314,7 +314,12 @@ class Letterboxd:
         self._handle_error(response)
         return response
 
-    def get_films(self, sort: str= "FilmPopularity", start: int = 1) -> dict:
+    def get_films(
+        self,
+        sort: str = "FilmPopularity",
+        start: int = 1,
+        per_page: int = 20,
+    ) -> dict:
         """
         Available sort options:
             - FilmPopularity
@@ -330,6 +335,7 @@ class Letterboxd:
         """
         params = {
             "sort": sort,
+            "perPage": per_page,
         }
         if start > 1:
             params["cursor"] = f"start={start}"
