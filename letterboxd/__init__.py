@@ -38,6 +38,7 @@ class Letterboxd:
         self.logged_in = False
         self.session_expire_date = None
         self._login()
+        self.member_id = self.get_me()["member"]["id"]
 
     def _login(self) -> bool:
         response = self.__session.http(
@@ -100,6 +101,30 @@ class Letterboxd:
         return not following_status
 
     ### Getters ###
+
+    def get_activities(
+        self,
+        member_id: str,
+        per_page: int = 24,
+        start: int = 1,
+    ) -> dict:
+        """
+        TODO: currently it only returns DiaryEntryActivity. implement other activities
+        later.
+        """
+        params = {
+            "perPage": per_page,
+            "include": "DiaryEntryActivity",
+        }
+        if start > 1:
+            params["cursor"] = f"start={start}"
+        response = self.__session.http(
+            method="GET",
+            path=f"/api/v0/member/{member_id}/activity",
+            params=params,
+        )
+        self._handle_error(response)
+        return response
 
     def get_news(self, per_page: int = 20, start: int = 1) -> dict:
         # Max 100 per page
