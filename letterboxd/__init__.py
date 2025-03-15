@@ -37,6 +37,8 @@ class Letterboxd:
         self.reconnect = reconnect
         self.logged_in = False
         self.session_expire_date = None
+        
+    def login(self):
         self._login()
         self.member_id = self.get_me()["member"]["id"]
 
@@ -335,6 +337,14 @@ class Letterboxd:
         response = self.__session.http(
             method="GET",
             path=f"/api/v0/log-entry/{log_entry_id}/me",
+        )
+        self._handle_error(response)
+        return response
+
+    def get_log_entry(self, log_entry_id: str) -> dict:
+        response = self.__session.http(
+            method="GET",
+            path=f"/api/v0/log-entry/{log_entry_id}",
         )
         self._handle_error(response)
         return response
